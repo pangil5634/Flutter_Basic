@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:test_app/dropdown.dart';
+import 'package:test_app/past/image.dart';
 
 void main() {
   runApp(const MyApp());
@@ -35,7 +35,8 @@ class _MyHomePageState extends State<MyHomePage> {
         leading: const Icon(Icons.arrow_back),
         title: const Text('App Bar'),
       ),
-      body: const HomeDropDown(),
+      body: const HomeImage(),
+      drawer: const Drawer(),
     );
   }
 }
