@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:test_app/layout/drawer.dart';
-import 'package:test_app/past/grid_view.dart';
+import 'package:test_app/past/statefulwidget.dart';
 
 void main() {
   runApp(const MyApp());
@@ -36,7 +36,7 @@ class _MyHomePageState extends State<MyHomePage> {
         leading: const Icon(Icons.arrow_back),
         title: const Text('App Bar'),
       ),
-      body: const HomeGridView(),
+      body: const Center(child: StatefulCounterApp(title: "김광일")),
       drawer: const LayoutDrawer(),
     );
   }
