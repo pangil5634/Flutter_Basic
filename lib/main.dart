@@ -57,7 +57,101 @@ class MyAppState extends ChangeNotifier {
   }
 }
 
-class MyHomePage extends StatelessWidget {
+class MyHomePage extends StatefulWidget {
+  @override
+  State<MyHomePage> createState() => _MyHomePageState();
+}
+
+class _MyHomePageState extends State<MyHomePage> {
+  var selectedIndex = 0;
+
+  @override
+  Widget build(BuildContext context) {
+    Widget page;
+
+    switch (selectedIndex) {
+      case 0:
+        page = GeneratorPage();
+        break;
+      case 1:
+        page =
+            FavoritesPage(); // 배치하는 곳마다 교차 사각형을 그려 UI의 해당 부분이 미완성임을 표시하는 편리한 위젯
+        break;
+      default:
+        throw UnimplementedError('no widget for $selectedIndex');
+    }
+
+    return LayoutBuilder(builder: (context, constraints) {
+      return Scaffold(
+        body: Row(
+          children: [
+            SafeArea(
+              child: NavigationRail(
+                // true일 경우 라벨이 아이콘 옆에 표시된다
+                // 조건을 주어 적용할 수도 있다.
+                extended: constraints.maxWidth >= 600,
+                destinations: [
+                  NavigationRailDestination(
+                      icon: Icon(Icons.home), label: Text('Home')),
+                  NavigationRailDestination(
+                      icon: Icon(Icons.favorite), label: Text('Favoriteis'))
+                ],
+                selectedIndex: selectedIndex, // 선택되는 색인
+
+                // 대상 중 하나를 선택할 때 발생하는 작업을 정의
+                // 콜백이 호출되면, 새 값을 콘솔로 인쇄하는 대신 setState() 호출 내 selectedIndex에 할당한다.
+                // 이 호출은 이전에 사용한 notifyListeneres() 메서드와 요사하며, UI가 업데이트되는지 확인한다.
+                onDestinationSelected: (value) {
+                  // print('selected : $value');
+                  setState(() {
+                    selectedIndex = value;
+                  });
+                },
+              ),
+            ),
+
+            // 일부 하위요소는 필요한 만큼 공간을 차지하고, 다른 위젯은 남은 공간을 최대한 차지해야 하는 레이아웃 표현
+            Expanded(
+              child: Container(
+                color: Theme.of(context).colorScheme.primaryContainer,
+                child: page,
+              ),
+            )
+          ],
+        ),
+      );
+    });
+  }
+}
+
+class FavoritesPage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    var appState = context.watch<MyAppState>();
+    if (appState.favorites.isEmpty) {
+      return Center(
+        child: Text('No favorites yet.'),
+      );
+    }
+
+    return (ListView(
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(20),
+          child: Text('You have '
+              '${appState.favorites.length} favorites:'),
+        ),
+        for (var pair in appState.favorites)
+          ListTile(
+            leading: Icon(Icons.favorite),
+            title: Text(pair.asLowerCase),
+          ),
+      ],
+    ));
+  }
+}
+
+class GeneratorPage extends StatelessWidget {
   // 모든 위젯은 위젯이 항상 최신 상태로 유지되도록, 위젯의 상황이 변경될 때마다 자동으로 호출되는 build() 메소드를 정의한다.
   // watch 메서드를 사용하여 앱의 현재 상태에 관한 변경사항을 추적한다.
 
@@ -73,41 +167,37 @@ class MyHomePage extends StatelessWidget {
       icon = Icons.favorite_border;
     }
 
-    return Scaffold(
-      body: SafeArea(
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              // Text('A random AWESOME idea:'),
-              BigCard(pair: pair),
-              SizedBox(
-                height: 10,
-              ),
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  ElevatedButton.icon(
-                      onPressed: () {
-                        appState.toggleFavaorite();
-                      },
-                      icon: Icon(icon),
-                      label: Text('Like')),
-                  SizedBox(
-                    width: 10,
-                  ),
-                  ElevatedButton(
-                    onPressed: () {
-                      // print('button pressed');
-                      appState.getNext();
-                    },
-                    child: Text('Next'),
-                  ),
-                ],
-              )
-            ],
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          // Text('A random AWESOME idea:'),
+          BigCard(pair: pair),
+          SizedBox(
+            height: 10,
           ),
-        ),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ElevatedButton.icon(
+                  onPressed: () {
+                    appState.toggleFavaorite();
+                  },
+                  icon: Icon(icon),
+                  label: Text('Like')),
+              SizedBox(
+                width: 10,
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  // print('button pressed');
+                  appState.getNext();
+                },
+                child: Text('Next'),
+              ),
+            ],
+          )
+        ],
       ),
     );
   }
