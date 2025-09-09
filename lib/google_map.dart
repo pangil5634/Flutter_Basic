@@ -7,10 +7,14 @@ class MyApp extends StatefulWidget {
   const MyApp({Key? key}) : super(key: key);
 
   @override
-  _MyAppState createState() => _MyAppState();
+  MyAppState createState() => MyAppState();
 }
 
-class _MyAppState extends State<MyApp> {
+/*
+  _MyAppState -> MyAppSate로 변경
+  : createState()가 public인데, 리턴 타입으로 private 클래스(_MyAppState)를 써서 난 에러 해결을 위함.
+*/
+class MyAppState extends State<MyApp> {
   late GoogleMapController mapController;
 
   final LatLng _center = const LatLng(45.521563, -122.677433);
