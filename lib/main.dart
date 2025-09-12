@@ -1,275 +1,128 @@
 import 'package:flutter/material.dart';
+import 'package:shimmer/shimmer.dart';
 
-/*
-  [0] remove SingleChildScrollView 
-
-  [1] Remove the appBar
-  [2] Make 5 buttons using ButtonWithText()
-  [3] Change the Color of each Button and Text (Color: black)
-  [4] Especially, in ButtonSection Container needs padding
-  [5] Change the text to your NAME and STUDENT NUMBER.
-  [6] Change the color of star icon (Color: yellow) and add interactivity to the star icon as guided in [Adding interactivity] doc.
-  [7] add interactivity to the star icon as guided in [Adding interactivity] doc.
-  [8-1] Add a Divider under the TitleSection
-  [8-2] Add a Divider under the ButtonSection
-  [9] Set the padding area(EdgeInsets.all(32.0)) to all four sides of the Text Section.
-  [10-1] Place the Icon on the left side, and the text on the right side
-  [10-2] Icon : Icons.message, size: 40.0
-  [11] Change the font weight of the Text('Recent Message') bold.
-  [12-1] Use CrossAxisAlignment.start for each row.
-  [12-2] Use CrossAxisAlignment.start for each column.
-  [13] Apply padding (EdgeInsets.fromLTRB(10.0, 0.0, 10.0, 0.0) to the text part of messageSection.
-*/
-void main() => runApp(const MyApp());
-
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    // const String appTitle = 'Flutter layout demo';
-    return MaterialApp(
-      home: Scaffold(
-        // [1] Remove the appBar
-        // appBar: AppBar(title: const Text(appTitle)),
-        body: const Center(
-          // [0] remove SingleChildScrollView
-          child: Column(
-            children: [
-              ImageSection(
-                image: 'images/lake.jpg',
-              ),
-
-              TitleSection(
-                // [5] Change the text to your NAME and STUDENT NUMBER.
-                name: 'Kwangil Kim',
-                location: '22000051',
-              ),
-
-              // [8-1] Add a Divider under the TitleSection
-              Divider(
-                height: 1.0,
-                color: Colors.black,
-              ),
-
-              ButtonSection(),
-
-              // [8-2] Add a Divider under the ButtonSection
-              Divider(
-                height: 1.0,
-                color: Colors.black,
-              ),
-
-              TextSection(recentMessage: "Long time no see!"),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
+void main() {
+  runApp(const MaterialApp(
+    debugShowCheckedModeBanner: false,
+    home: FeedLoadingExample(),
+  ));
 }
 
-class ImageSection extends StatelessWidget {
-  const ImageSection({super.key, required this.image});
-
-  final String image;
+class FeedLoadingExample extends StatefulWidget {
+  const FeedLoadingExample({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return Image.asset(image, width: 600, height: 240, fit: BoxFit.cover);
-  }
+  State<FeedLoadingExample> createState() => _FeedLoadingExampleState();
 }
 
-class TitleSection extends StatelessWidget {
-  const TitleSection({super.key, required this.name, required this.location});
-
-  final String name;
-  final String location;
+class _FeedLoadingExampleState extends State<FeedLoadingExample> {
+  bool _isLoading = true;
 
   @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(32),
-      child: Row(
-        children: [
-          Expanded(
-            /*1*/
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                /*2*/
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 8),
-                  child: Text(
-                    name,
-                    style: const TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                ),
-                Text(location, style: TextStyle(color: Colors.grey[500])),
-              ],
-            ),
-          ),
-          /*3*/
-          // Icon(Icons.star, color: Colors.red[500]),
-          // const Text('41'),
-          const FavoriteWidget(),
-        ],
-      ),
-    );
-  }
-}
+  void initState() {
+    super.initState();
 
-class FavoriteWidget extends StatefulWidget {
-  const FavoriteWidget({super.key});
-
-  @override
-  State<FavoriteWidget> createState() => _FavoriteWidgetState();
-}
-
-class _FavoriteWidgetState extends State<FavoriteWidget> {
-  bool _isFavorited = false;
-  int _favoriteCount = 41;
-
-  void _toggleFavorite() {
-    setState(() {
-      if (_isFavorited) {
-        _favoriteCount -= 1;
-        _isFavorited = false;
-      } else {
-        _favoriteCount += 1;
-        _isFavorited = true;
-      }
+    // 5초 뒤 로딩 해제
+    Future.delayed(const Duration(seconds: 5), () {
+      setState(() {
+        _isLoading = false;
+      });
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
-          padding: const EdgeInsets.all(0),
-          child: IconButton(
-            padding: const EdgeInsets.all(0),
-            alignment: Alignment.center,
-            icon: (_isFavorited
-                ? const Icon(Icons.star)
-                : const Icon(Icons.star_border)),
-            // [6] Change the color of star icon (Color: yellow)
-            color: Colors.yellow,
-            // [7] add interactivity to the star icon as guided in [Adding interactivity] doc.
-            onPressed: _toggleFavorite,
+    return Scaffold(
+      appBar: AppBar(title: const Text("피드 로딩 Shimmer 예제")),
+      body: _isLoading ? _buildLoadingList() : _buildRealList(),
+    );
+  }
+
+  /// 로딩 중일 때 Shimmer 리스트
+  Widget _buildLoadingList() {
+    return ListView.separated(
+      padding: const EdgeInsets.all(16),
+      itemCount: 5,
+      separatorBuilder: (_, __) => const SizedBox(height: 20),
+      itemBuilder: (context, index) {
+        return Shimmer.fromColors(
+          baseColor: Colors.grey[300]!,
+          highlightColor: Colors.grey[100]!,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // 이미지 영역 (로딩)
+              Container(
+                width: double.infinity,
+                height: 180,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              const SizedBox(height: 12),
+
+              // 텍스트 2줄 (로딩)
+              Container(
+                width: double.infinity,
+                height: 16,
+                color: Colors.white,
+              ),
+              const SizedBox(height: 8),
+              Container(
+                width: 150,
+                height: 16,
+                color: Colors.white,
+              )
+            ],
           ),
-        ),
-        SizedBox(width: 20, child: SizedBox(child: Text('$_favoriteCount'))),
-      ],
+        );
+      },
     );
   }
-}
 
-class ButtonSection extends StatelessWidget {
-  const ButtonSection({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    // [3] Change the Color of each Button and Text (Color: black)
-    Color color = Colors.black;
-    return SizedBox(
-      child: Padding(
-        // [4] Especially, in ButtonSection Container needs padding
-        // 설명 : const EdgeInsets.fromLTRB(this.left, this.top, this.right, this.bottom);
-        padding: EdgeInsets.fromLTRB(10.0, 10.0, 10.0, 10.0),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            // [2] Make 5 buttons using ButtonWithText()
-            ButtonWithText(color: color, icon: Icons.call, label: 'CALL'),
-            ButtonWithText(color: color, icon: Icons.message, label: 'MESSAGE'),
-            ButtonWithText(color: color, icon: Icons.email, label: 'EMAIL'),
-            ButtonWithText(color: color, icon: Icons.share, label: 'SHARE'),
-            ButtonWithText(color: color, icon: Icons.description, label: 'ETC'),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class ButtonWithText extends StatelessWidget {
-  const ButtonWithText({
-    super.key,
-    required this.color,
-    required this.icon,
-    required this.label,
-  });
-
-  final Color color;
-  final IconData icon;
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Icon(icon, color: color),
-        Padding(
-          padding: const EdgeInsets.only(top: 8),
-          child: Text(
-            label,
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w400,
-              color: color,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class TextSection extends StatelessWidget {
-  const TextSection({super.key, required this.recentMessage});
-
-  final String recentMessage;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-        // [9] Set the padding area(EdgeInsets.all(32.0)) to all four sides of the Text Section.
-        padding: const EdgeInsets.all(32.0),
-        child: Row(
-          // [12-1] Use CrossAxisAlignment.start for each row.
+  /// 실제 데이터 리스트
+  Widget _buildRealList() {
+    return ListView.separated(
+      padding: const EdgeInsets.all(16),
+      itemCount: 5,
+      separatorBuilder: (_, __) => const SizedBox(height: 20),
+      itemBuilder: (context, index) {
+        return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // [10-1] Place the Icon on the left side, and the text on the right side
-            // [10-2] Icon : Icons.message, size: 40.0
-            Icon(
-              Icons.message,
-              size: 40.0,
-            ),
-            Padding(
-              // [13] Apply padding (EdgeInsets.fromLTRB(10.0, 0.0, 10.0, 0.0) to the text part of messageSection.
-              padding: EdgeInsets.fromLTRB(10.0, 0.0, 10.0, 0.0),
-              child: Column(
-                // [12-2] Use CrossAxisAlignment.start for each column.
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    "Recent Message",
-
-                    // [11] Change the font weight of the Text('Recent Message') bold.
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  Text(recentMessage),
-                ],
+            // 실제 이미지
+            Container(
+              width: double.infinity,
+              height: 180,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12),
               ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: Image.network(
+                  "https://picsum.photos/400/200?random=$index",
+                  fit: BoxFit.cover,
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+
+            // 실제 텍스트
+            Text(
+              "피드 제목 $index",
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              "여기는 실제 데이터가 표시되는 부분입니다. " "Shimmer 로딩이 끝나면 이렇게 보이게 돼요.",
             )
           ],
-        ));
+        );
+      },
+    );
   }
 }

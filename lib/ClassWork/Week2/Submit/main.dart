@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 /*
+  GUIDE : Please copy and paste to find the functions.
+
   [0] remove SingleChildScrollView 
 
   [1] Remove the appBar
