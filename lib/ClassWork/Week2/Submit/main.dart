@@ -129,7 +129,7 @@ class FavoriteWidget extends StatefulWidget {
 }
 
 class _FavoriteWidgetState extends State<FavoriteWidget> {
-  bool _isFavorited = false;
+  bool _isFavorited = true;
   int _favoriteCount = 41;
 
   void _toggleFavorite() {
