@@ -8,6 +8,13 @@
   [4-1] After creating the profile page, add an icon button to the navigation rail and bottom navigation bar to navigate to the profile page.
   [4-2] After creating the profile page, add an icon button to the navigation rail and bottom navigation bar to navigate to the profile page.
   [5] Use Image.network to generate a rounded frame image by using ClipRRect.
+  [6] In ClipRRect, set border radius 50.
+  [7] Write your name and student number in the text.
+  [8] Change font weight
+  [9] Add a SnackBar
+  [10] Modify the layout of the GridView to ListView.
+  [11] Modify to place the icon in the trailing.
+  [12] Add a AlertDialog
 */
 
 import 'package:english_words/english_words.dart';
@@ -26,7 +33,7 @@ class MyApp extends StatelessWidget {
     return ChangeNotifierProvider(
       create: (context) => MyAppState(),
       child: MaterialApp(
-        title: 'Namer App',
+        title: 'Classwork 3',
         theme: ThemeData(
           useMaterial3: true,
           // [1] Modify the theme data to change the app's primary color to ‘blue’
@@ -153,11 +160,13 @@ class _MyHomePageState extends State<MyHomePage> {
                     extended: constraints.maxWidth >= 600,
                     destinations: [
                       NavigationRailDestination(
-                        icon: Icon(Icons.home),
+                        // [2-1] Change the icons of the icon buttons associated with the navigator to outline buttons.
+                        icon: Icon(Icons.home_outlined),
                         label: Text('Home'),
                       ),
                       NavigationRailDestination(
-                        icon: Icon(Icons.favorite),
+                        // [2-2] Change the icons of the icon buttons associated with the navigator to outline buttons.
+                        icon: Icon(Icons.favorite_border),
                         label: Text('Favorites'),
                       ),
                       // [4-2] After creating the profile page, add an icon button to the navigation rail and bottom navigation bar to navigate to the profile page.
@@ -214,6 +223,18 @@ class GeneratorPage extends StatelessWidget {
               ElevatedButton.icon(
                 onPressed: () {
                   appState.toggleFavorite();
+
+                  // [9] Add a SnackBar
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        appState.favorites.contains(appState.current)
+                            ? "Saved"
+                            : "Deleted",
+                      ),
+                      duration: Duration(seconds: 1),
+                    ),
+                  );
                 },
                 icon: Icon(icon),
                 label: Text('Like'),
@@ -260,13 +281,14 @@ class BigCard extends StatelessWidget {
           child: MergeSemantics(
             child: Wrap(
               children: [
+                // [8] Change font weight
                 Text(
                   pair.first,
-                  style: style.copyWith(fontWeight: FontWeight.w200),
+                  style: style.copyWith(fontWeight: FontWeight.bold),
                 ),
                 Text(
                   pair.second,
-                  style: style.copyWith(fontWeight: FontWeight.bold),
+                  style: style.copyWith(fontWeight: FontWeight.w100),
                 )
               ],
             ),
@@ -289,40 +311,92 @@ class FavoritesPage extends StatelessWidget {
       );
     }
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.all(30),
-          child: Text('You have '
-              '${appState.favorites.length} favorites:'),
-        ),
-        Expanded(
-          // Make better use of wide windows with a grid.
-          child: GridView(
-            gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-              maxCrossAxisExtent: 400,
-              childAspectRatio: 400 / 80,
-            ),
-            children: [
-              for (var pair in appState.favorites)
-                ListTile(
-                  leading: IconButton(
-                    icon: Icon(Icons.delete_outline, semanticLabel: 'Delete'),
-                    color: theme.colorScheme.primary,
-                    onPressed: () {
-                      appState.removeFavorite(pair);
-                    },
-                  ),
-                  title: Text(
-                    pair.asLowerCase,
-                    semanticsLabel: pair.asPascalCase,
-                  ),
-                ),
-            ],
+    return SafeArea(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(30),
+            child: Text('You have '
+                '${appState.favorites.length} favorites:'),
           ),
-        ),
-      ],
+          Expanded(
+            // [10] Modify the layout of the GridView to ListView.
+            child: ListView(
+              children: [
+                for (var pair in appState.favorites)
+                  ListTile(
+                    title: Text(
+                      pair.asLowerCase,
+                      semanticsLabel: pair.asPascalCase,
+                    ),
+                    // [11] Modify to place the icon in the trailing.
+                    trailing: IconButton(
+                      icon: Icon(Icons.delete_outline, semanticLabel: 'Delete'),
+                      color: theme.colorScheme.primary,
+
+                      // [12] Add a AlertDialog
+                      onPressed: () => showDialog<String>(
+                        context: context,
+                        builder: (BuildContext context) => AlertDialog(
+                          title: const Text('Delete'),
+                          content:
+                              const Text('Are you sure you want to delete it?'),
+                          actions: <Widget>[
+                            TextButton(
+                              onPressed: () => Navigator.pop(context, 'Cancel'),
+                              child: const Text('Cancel'),
+                            ),
+                            TextButton(
+                                onPressed: () => {
+                                      appState.removeFavorite(pair),
+                                      Navigator.pop(context, 'OK'),
+                                    },
+                                child: const Text('OK')),
+                          ],
+                        ),
+                      ),
+                    ),
+
+                    // Make better use of wide windows with a grid.
+                    // child: GridView(
+                    //   gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+                    //     maxCrossAxisExtent: 400,
+                    //     childAspectRatio: 400 / 80,
+                    //   ),
+                    //   children: [
+                    //     for (var pair in appState.favorites)
+                    //       // ListTile(
+                    //       //   leading: IconButton(
+                    //       //     icon: Icon(Icons.delete_outline, semanticLabel: 'Delete'),
+                    //       //     color: theme.colorScheme.primary,
+                    //       //     onPressed: () {
+                    //       //       appState.removeFavorite(pair);
+                    //       //     },
+                    //       //   ),
+                    //       //   title: Text(
+                    //       //     pair.asLowerCase,
+                    //       //     semanticsLabel: pair.asPascalCase,
+                    //       //   ),
+                    //       // ),
+                    //       ListTile(
+                    //         trailing: IconButton(
+                    //           icon: Icon(Icons.delete_outline, semanticLabel: 'Delete'),
+                    //           color: theme.colorScheme.primary,
+                    //           onPressed: () {
+                    //             appState.removeFavorite(pair);
+                    //           },
+                    //         ),
+                    //         leading: Text(
+                    //           pair.asLowerCase,
+                    //           semanticsLabel: pair.asPascalCase,
+                    //         ),
+                  ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -389,23 +463,33 @@ class _HistoryListViewState extends State<HistoryListView> {
   }
 }
 
+// [3] Create a page for the screen showing the profile.
 class ProfilePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // [5] Use Image.network to generate a rounded frame image by using ClipRRect.
-        ClipRRect(
-          borderRadius: BorderRadius.circular(50.0),
-          child: Image.network(
-            "https://avatars.githubusercontent.com/u/54162245?v=4",
-            width: 300,
+        Padding(
+          padding: const EdgeInsets.fromLTRB(70, 70, 70, 20),
+          child: ClipRRect(
+            // [6] In ClipRRect, set border radius 50.
+            borderRadius: BorderRadius.circular(50.0),
+            child: Image.network(
+              "https://avatars.githubusercontent.com/u/54162245?v=4",
+            ),
           ),
-        )
+        ),
+        // [7] Write your name and student number in the text.
+        Text(
+          "22000051",
+          style: TextStyle(fontSize: 15),
+        ),
+        Text(
+          "Kwangil Kim",
+          style: TextStyle(fontSize: 15),
+        ),
       ],
     );
   }
 }
-
-// [3] Create a page for the screen showing the profile.
