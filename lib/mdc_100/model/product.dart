@@ -12,7 +12,31 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import 'package:basic_flutter/mdc_100/app.dart';
-import 'package:flutter/material.dart';
+enum Category {
+  all,
+  accessories,
+  clothing,
+  home,
+}
 
-void main() => runApp(const ShrineApp());
+class Product {
+  const Product({
+    required this.category,
+    required this.id,
+    required this.isFeatured,
+    required this.name,
+    required this.price,
+  });
+
+  final Category category;
+  final int id;
+  final bool isFeatured;
+  final String name;
+  final int price;
+
+  String get assetName => '$id-0.jpg';
+  String get assetPackage => 'shrine_images';
+
+  @override
+  String toString() => "$name (id=$id)";
+}
