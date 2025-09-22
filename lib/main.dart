@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import 'package:basic_flutter/mdc_100/app.dart';
+import 'package:basic_flutter/mdc/app.dart';
 import 'package:flutter/material.dart';
 
 void main() => runApp(const ShrineApp());
