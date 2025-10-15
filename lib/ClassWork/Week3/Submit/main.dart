@@ -357,40 +357,6 @@ class FavoritesPage extends StatelessWidget {
                         ),
                       ),
                     ),
-
-                    // Make better use of wide windows with a grid.
-                    // child: GridView(
-                    //   gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-                    //     maxCrossAxisExtent: 400,
-                    //     childAspectRatio: 400 / 80,
-                    //   ),
-                    //   children: [
-                    //     for (var pair in appState.favorites)
-                    //       // ListTile(
-                    //       //   leading: IconButton(
-                    //       //     icon: Icon(Icons.delete_outline, semanticLabel: 'Delete'),
-                    //       //     color: theme.colorScheme.primary,
-                    //       //     onPressed: () {
-                    //       //       appState.removeFavorite(pair);
-                    //       //     },
-                    //       //   ),
-                    //       //   title: Text(
-                    //       //     pair.asLowerCase,
-                    //       //     semanticsLabel: pair.asPascalCase,
-                    //       //   ),
-                    //       // ),
-                    //       ListTile(
-                    //         trailing: IconButton(
-                    //           icon: Icon(Icons.delete_outline, semanticLabel: 'Delete'),
-                    //           color: theme.colorScheme.primary,
-                    //           onPressed: () {
-                    //             appState.removeFavorite(pair);
-                    //           },
-                    //         ),
-                    //         leading: Text(
-                    //           pair.asLowerCase,
-                    //           semanticsLabel: pair.asPascalCase,
-                    //         ),
                   ),
               ],
             ),
