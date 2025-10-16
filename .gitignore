@@ -52,3 +52,6 @@ app.*.map.json
 /web
 
 .vscode
+
+firebase_options.dart
+firebase.json

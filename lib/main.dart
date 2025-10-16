@@ -1,28 +1,23 @@
-// ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables
-
-/*
-  [1] Modify the theme data to change the app's primary color to ‘blue’ 
-  [2-1] Change the icons of the icon buttons associated with the navigator to outline buttons.
-  [2-2] Change the icons of the icon buttons associated with the navigator to outline buttons.
-  [3] Create a page for the screen showing the profile.
-  [4-1] After creating the profile page, add an icon button to the navigation rail and bottom navigation bar to navigate to the profile page.
-  [4-2] After creating the profile page, add an icon button to the navigation rail and bottom navigation bar to navigate to the profile page.
-  [5] Use Image.network to generate a rounded frame image by using ClipRRect.
-  [6] In ClipRRect, set border radius 50.
-  [7] Write your name and student number in the text.
-  [8] Change font weight
-  [9] Add a SnackBar
-  [10] Modify the layout of the GridView to ListView.
-  [11] Modify to place the icon in the trailing.
-  [12] Add a AlertDialog
-*/
-
-import 'package:english_words/english_words.dart';
+import 'package:basic_flutter/firebase/app.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
 
-void main() {
-  runApp(MyApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // 🔹 Firebase 초기화 (에러 핸들링 포함)
+  try {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+  } catch (e) {
+    debugPrint('Firebase 초기화 중 오류 발생: $e');
+  }
+
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -31,431 +26,34 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (context) => MyAppState(),
+      create: (_) => MyAppState(),
       child: MaterialApp(
-        title: 'Classwork 3',
-        theme: ThemeData(
-          useMaterial3: true,
-          // [1] Modify the theme data to change the app's primary color to ‘blue’
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
-        ),
-        home: MyHomePage(),
-      ),
+          debugShowCheckedModeBanner: false, // 🔹 디버그 배너 제거
+          title: 'Flutter Firebase',
+          theme: ThemeData(
+            useMaterial3: true,
+            colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
+          ),
+          home: MyRoutes()),
     );
   }
 }
 
 class MyAppState extends ChangeNotifier {
-  var current = WordPair.random();
-  var history = <WordPair>[];
+  // ✅ 앱 상태 관련 변수/메서드 추가
+  User? _currentUser;
 
-  GlobalKey? historyListKey;
+  User? get currentUser => _currentUser;
 
-  void getNext() {
-    history.insert(0, current);
-    var animatedList = historyListKey?.currentState as AnimatedListState?;
-    animatedList?.insertItem(0);
-    current = WordPair.random();
+  // 🔹 로그인 시 호출
+  void setUser(User? user) {
+    _currentUser = user;
     notifyListeners();
   }
 
-  var favorites = <WordPair>[];
-
-  void toggleFavorite([WordPair? pair]) {
-    pair = pair ?? current;
-    if (favorites.contains(pair)) {
-      favorites.remove(pair);
-    } else {
-      favorites.add(pair);
-    }
+  // 🔹 로그아웃 시 호출
+  void clearUser() {
+    _currentUser = null;
     notifyListeners();
-  }
-
-  void removeFavorite(WordPair pair) {
-    favorites.remove(pair);
-    notifyListeners();
-  }
-}
-
-class MyHomePage extends StatefulWidget {
-  @override
-  State<MyHomePage> createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  var selectedIndex = 0;
-
-  @override
-  Widget build(BuildContext context) {
-    var colorScheme = Theme.of(context).colorScheme;
-
-    Widget page;
-    switch (selectedIndex) {
-      case 0:
-        page = GeneratorPage();
-        break;
-      case 1:
-        page = FavoritesPage();
-        break;
-      case 2:
-        page = ProfilePage();
-        break;
-      default:
-        throw UnimplementedError('no widget for $selectedIndex');
-    }
-
-    // The container for the current page, with its background color
-    // and subtle switching animation.
-    var mainArea = ColoredBox(
-      color: colorScheme.surfaceVariant,
-      child: AnimatedSwitcher(
-        duration: Duration(milliseconds: 200),
-        child: page,
-      ),
-    );
-
-    return Scaffold(
-      body: LayoutBuilder(
-        builder: (context, constraints) {
-          if (constraints.maxWidth < 450) {
-            // Use a more mobile-friendly layout with BottomNavigationBar
-            // on narrow screens.
-            return Column(
-              children: [
-                Expanded(child: mainArea),
-                SafeArea(
-                  child: BottomNavigationBar(
-                    items: [
-                      BottomNavigationBarItem(
-                        // [2-1] Change the icons of the icon buttons associated with the navigator to outline buttons.
-                        icon: Icon(Icons.home_outlined),
-                        label: 'Home',
-                      ),
-                      BottomNavigationBarItem(
-                        // [2-2] Change the icons of the icon buttons associated with the navigator to outline buttons.
-                        icon: Icon(Icons.favorite_border),
-                        label: 'Favorites',
-                      ),
-                      BottomNavigationBarItem(
-                        // [4-1] After creating the profile page, add an icon button to the navigation rail and bottom navigation bar to navigate to the profile page.
-                        icon: Icon(Icons.person_outlined),
-                        label: 'Profile',
-                      ),
-                    ],
-                    currentIndex: selectedIndex,
-                    onTap: (value) {
-                      setState(() {
-                        selectedIndex = value;
-                      });
-                    },
-                  ),
-                )
-              ],
-            );
-          } else {
-            return Row(
-              children: [
-                SafeArea(
-                  child: NavigationRail(
-                    extended: constraints.maxWidth >= 600,
-                    destinations: [
-                      NavigationRailDestination(
-                        // [2-1] Change the icons of the icon buttons associated with the navigator to outline buttons.
-                        icon: Icon(Icons.home_outlined),
-                        label: Text('Home'),
-                      ),
-                      NavigationRailDestination(
-                        // [2-2] Change the icons of the icon buttons associated with the navigator to outline buttons.
-                        icon: Icon(Icons.favorite_border),
-                        label: Text('Favorites'),
-                      ),
-                      // [4-2] After creating the profile page, add an icon button to the navigation rail and bottom navigation bar to navigate to the profile page.
-                      NavigationRailDestination(
-                        icon: Icon(Icons.person_outlined),
-                        label: Text('Profile'),
-                      ),
-                    ],
-                    selectedIndex: selectedIndex,
-                    onDestinationSelected: (value) {
-                      setState(() {
-                        selectedIndex = value;
-                      });
-                    },
-                  ),
-                ),
-                Expanded(child: mainArea),
-              ],
-            );
-          }
-        },
-      ),
-    );
-  }
-}
-
-class GeneratorPage extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    var appState = context.watch<MyAppState>();
-    var pair = appState.current;
-
-    IconData icon;
-    if (appState.favorites.contains(pair)) {
-      icon = Icons.favorite;
-    } else {
-      icon = Icons.favorite_border;
-    }
-
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Expanded(
-            flex: 3,
-            child: HistoryListView(),
-          ),
-          SizedBox(height: 10),
-          BigCard(pair: pair),
-          SizedBox(height: 10),
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ElevatedButton.icon(
-                onPressed: () {
-                  appState.toggleFavorite();
-
-                  // [9] Add a SnackBar
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(
-                        appState.favorites.contains(appState.current)
-                            ? "Saved"
-                            : "Deleted",
-                      ),
-                      duration: Duration(seconds: 1),
-                    ),
-                  );
-                },
-                icon: Icon(icon),
-                label: Text('Like'),
-              ),
-              SizedBox(width: 10),
-              ElevatedButton(
-                onPressed: () {
-                  appState.getNext();
-                },
-                child: Text('Next'),
-              ),
-            ],
-          ),
-          Spacer(flex: 2),
-        ],
-      ),
-    );
-  }
-}
-
-class BigCard extends StatelessWidget {
-  const BigCard({
-    Key? key,
-    required this.pair,
-  }) : super(key: key);
-
-  final WordPair pair;
-
-  @override
-  Widget build(BuildContext context) {
-    var theme = Theme.of(context);
-    var style = theme.textTheme.displayMedium!.copyWith(
-      color: theme.colorScheme.onPrimary,
-    );
-
-    return Card(
-      color: theme.colorScheme.primary,
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: AnimatedSize(
-          duration: Duration(milliseconds: 200),
-          // Make sure that the compound word wraps correctly when the window
-          // is too narrow.
-          child: MergeSemantics(
-            child: Wrap(
-              children: [
-                // [8] Change font weight
-                Text(
-                  pair.first,
-                  style: style.copyWith(fontWeight: FontWeight.bold),
-                ),
-                Text(
-                  pair.second,
-                  style: style.copyWith(fontWeight: FontWeight.w100),
-                )
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class FavoritesPage extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    var theme = Theme.of(context);
-    var appState = context.watch<MyAppState>();
-
-    if (appState.favorites.isEmpty) {
-      return Center(
-        child: Text('No favorites yet.'),
-      );
-    }
-
-    return SafeArea(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(30),
-            child: Text('You have '
-                '${appState.favorites.length} favorites:'),
-          ),
-          Expanded(
-            // [10] Modify the layout of the GridView to ListView.
-            child: ListView(
-              children: [
-                for (var pair in appState.favorites)
-                  ListTile(
-                    title: Text(
-                      pair.asLowerCase,
-                      semanticsLabel: pair.asPascalCase,
-                    ),
-                    // [11] Modify to place the icon in the trailing.
-                    trailing: IconButton(
-                      icon: Icon(Icons.delete_outline, semanticLabel: 'Delete'),
-                      color: theme.colorScheme.primary,
-
-                      // [12] Add a AlertDialog
-                      onPressed: () => showDialog<String>(
-                        context: context,
-                        builder: (BuildContext context) => AlertDialog(
-                          title: const Text('Delete'),
-                          content:
-                              const Text('Are you sure you want to delete it?'),
-                          actions: <Widget>[
-                            TextButton(
-                              onPressed: () => Navigator.pop(context, 'Cancel'),
-                              child: const Text('Cancel'),
-                            ),
-                            TextButton(
-                                onPressed: () => {
-                                      appState.removeFavorite(pair),
-                                      Navigator.pop(context, 'OK'),
-                                    },
-                                child: const Text('OK')),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class HistoryListView extends StatefulWidget {
-  const HistoryListView({Key? key}) : super(key: key);
-
-  @override
-  State<HistoryListView> createState() => _HistoryListViewState();
-}
-
-class _HistoryListViewState extends State<HistoryListView> {
-  /// Needed so that [MyAppState] can tell [AnimatedList] below to animate
-  /// new items.
-  final _key = GlobalKey();
-
-  /// Used to "fade out" the history items at the top, to suggest continuation.
-  static const Gradient _maskingGradient = LinearGradient(
-    // This gradient goes from fully transparent to fully opaque black...
-    colors: [Colors.transparent, Colors.black],
-    // ... from the top (transparent) to half (0.5) of the way to the bottom.
-    stops: [0.0, 0.5],
-    begin: Alignment.topCenter,
-    end: Alignment.bottomCenter,
-  );
-
-  @override
-  Widget build(BuildContext context) {
-    final appState = context.watch<MyAppState>();
-    appState.historyListKey = _key;
-
-    return ShaderMask(
-      shaderCallback: (bounds) => _maskingGradient.createShader(bounds),
-      // This blend mode takes the opacity of the shader (i.e. our gradient)
-      // and applies it to the destination (i.e. our animated list).
-      blendMode: BlendMode.dstIn,
-      child: AnimatedList(
-        key: _key,
-        reverse: true,
-        padding: EdgeInsets.only(top: 100),
-        initialItemCount: appState.history.length,
-        itemBuilder: (context, index, animation) {
-          final pair = appState.history[index];
-          return SizeTransition(
-            sizeFactor: animation,
-            child: Center(
-              child: TextButton.icon(
-                onPressed: () {
-                  appState.toggleFavorite(pair);
-                },
-                icon: appState.favorites.contains(pair)
-                    ? Icon(Icons.favorite, size: 12)
-                    : SizedBox(),
-                label: Text(
-                  pair.asLowerCase,
-                  semanticsLabel: pair.asPascalCase,
-                ),
-              ),
-            ),
-          );
-        },
-      ),
-    );
-  }
-}
-
-// [3] Create a page for the screen showing the profile.
-class ProfilePage extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        // [5] Use Image.network to generate a rounded frame image by using ClipRRect.
-        Padding(
-          padding: const EdgeInsets.fromLTRB(70, 70, 70, 20),
-          child: ClipRRect(
-            // [6] In ClipRRect, set border radius 50.
-            borderRadius: BorderRadius.circular(50.0),
-            child: Image.network(
-              "https://avatars.githubusercontent.com/u/54162245?v=4",
-            ),
-          ),
-        ),
-        // [7] Write your name and student number in the text.
-        Text(
-          "22000051",
-          style: TextStyle(fontSize: 15),
-        ),
-        Text(
-          "Kwangil Kim",
-          style: TextStyle(fontSize: 15),
-        ),
-      ],
-    );
   }
 }
